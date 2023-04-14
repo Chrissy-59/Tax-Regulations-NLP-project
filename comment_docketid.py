@@ -19,10 +19,9 @@ fedregs_api_url = lambda doc_num: (
 fedregs_search_api_url = lambda reg_num: (
             'https://www.federalregister.gov/api/v1/documents.json?fields%%5B%%5D=regulations_dot_gov_info&per_page=20&conditions%%5Bdocket_id%%5D=%s' % reg_num)
 #filename = sys.argv[2] if (len(sys.argv) > 2) else 'iloveyouuuu.csv'
-filename = 'comments_1128.csv'
-df = pd.read_excel('/Users/chrissymo/Documents/MSIS/research/with_Amanda/fetch_data_codes/Full-Sample_Reg_21-11-22.xlsx',sheet_name ="sample")
-df['document_number']
-fedreg_docnums = df.document_number.to_list()
+filename = 'output_1124.csv'
+df = pd.read_excel('/Users/chrissymo/Documents/MSIS/research/with_Amanda/fetch_data_codes/id_for_test.xlsx')
+docket_ids = df.docket_id.to_list()
 
 fieldnames = [
     'id',
@@ -113,27 +112,6 @@ def get_docx_string(link):
 
 
 # get_docx_string('https://downloads.regulations.gov/IRS-2016-0015-0125/attachment_1.docx')
-
-# get document id from the RIN
-docket_ids = {}
-print('Getting docket_ids from fedregs.gov...')
-for fedreg_docnum in fedreg_docnums:
-    response = requests.get(fedregs_api_url(fedreg_docnum))
-    if response.status_code == 404:
-        # look for ones using the reg num
-        print('   Couldn\'t find document using %s' % fedreg_docnum)
-        continue
-    rin = response.json()
-    if 'regulations_dot_gov_info' in rin and 'docket_id' in rin['regulations_dot_gov_info']:
-        docket_id = rin['regulations_dot_gov_info']['docket_id']
-        if (docket_id in docket_ids):
-            print('   Found a duplicate docket_id for %s - %s' % (fedreg_docnum, docket_id))
-        else:
-            print('   Fedreg docnum %s -- %s' % (fedreg_docnum, rin['regulations_dot_gov_info']['docket_id']))
-            docket_ids[rin['regulations_dot_gov_info']['docket_id']] = fedreg_docnum
-    else:
-        print('   Skipped fedreg docnum -- couldn\'t find docket_id for %s' % fedreg_docnum)
-print('Finished getting docket_ids.')
 
 # open csv writer to write for each docketId
 with open(filename, 'w', newline='') as csvfile:
